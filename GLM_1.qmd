@@ -1,0 +1,125 @@
+---
+title: "GLM"
+author: "billy fw"
+format: html
+editor: visual
+---
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+library(tidyverse)
+```
+
+### Import and view data:
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#import data
+df <- read.csv("//STUDATA05.shef.ac.uk/home/pc/pcp25bdf/ManW10/Desktop/PSY6210/data/Inequality.txt")
+#check variable type and glimpse at data
+str(df)
+```
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#check corellations
+cor(df[, c(8, 10, 11)], use = "complete.obs")
+```
+
+## Normal distribution of knife crime?
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#are hate crimes normally distributed?
+hist(df$hate_crimes_per_100k_splc,
+     main = "Distribution of Hate Crimes",
+     xlab = "Avg Hate Crimes per 100k (SPLC)",
+     col = "lightblue",
+     border = "black")
+```
+
+Positively skewed. Consider using log transform.
+
+### Model 1
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#create model 1
+lm1 <- lm(hate_crimes_per_100k_splc ~ gini_index, data = df)
+summary(lm1)
+```
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#create simple regression using ggplot
+plot1 <- ggplot(data = df, aes(x = gini_index, y = hate_crimes_per_100k_splc)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  labs(
+    title = "Hate Crimes x Economic Inequality",
+    x = "Gini Index",
+    y = "Hate Crimes per 100k"
+  ) +
+  theme_minimal() 
+plot1 + #add model equation as annotation
+  annotate("text",
+           x = 0.45,
+           y = 1.0,
+           label = "hate_crimes_per_100k_splc = -1.53 + 4.02*gini_index",
+           hjust = 0,
+           size = 4)
+```
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#model 2, adding controls
+lm2 <- lm(hate_crimes_per_100k_splc ~ gini_index + median_household_income +
+    share_unemployed_seasonal +
+    share_non_white +
+    share_population_with_high_school_degree, data = df)
+#compare models
+anova(lm1, lm2)
+```
+
+-   Sum of squared residuals decreases in model 2.
+
+-   Change in Rsquared = (2.6188 - 1.5181)/2.6188 = 0.42 = 42% additional variance explained by model 2.
+
+-   Model 2 is the stronger model where:
+
+    hate_crimes_per_100k_splc=−8.756624+8.192611\*gini_index+0.0000004816243\*median_household_income+6.044573\*share_unemployed_seasonal−0.1010473\*share_non_white+5.804145\*share_population_with_high_school_degree
+
+-   Each 1 unit increase in Gini index increases hate crimes by 8.19 per 100k, but this is unrealistic as gini_index takes values between .419 and .532
+
+-   Therefore a 0.01 unit increase in Gini index increases hate crimes by .0819 per 100
+
+## Check for homoscedasticity
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+plot(lm2, which = 1)
+```
+
+Residual variance does not look equal, therefore may have violated the assumption of homoscedasticity.
+
+## Check distribution of residuals
+
+```{r}
+plot(lm2, which = 2)
+```
