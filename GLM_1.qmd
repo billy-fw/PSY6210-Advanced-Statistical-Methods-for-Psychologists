@@ -10,6 +10,7 @@ editor: visual
 #| warning: false
 #| message: false
 library(tidyverse)
+library(interactions)
 ```
 
 ### Import and view data:
@@ -121,5 +122,40 @@ Residual variance does not look equal, therefore may have violated the assumptio
 ## Check distribution of residuals
 
 ```{r}
+#| echo: true
+#| warning: false
+#| message: false
 plot(lm2, which = 2)
+```
+
+### Practice 1- using logged outcome and centred predictor
+
+### Practice 2- Adding an interaction term
+
+e.g. Does inequality predict hate crime more strongly in politically conservative states?
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+lm3 <- lm(
+  hate_crimes_per_100k_splc ~ 
+    gini_index *share_voters_voted_trump +
+    median_household_income +
+    share_unemployed_seasonal +
+    share_non_white +
+    share_population_with_high_school_degree,
+  data = df
+)
+summary(lm3)
+```
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+interact_plot(lm3,
+              pred = gini_index,
+              modx = share_voters_voted_trump,
+              plot.points = TRUE)
 ```

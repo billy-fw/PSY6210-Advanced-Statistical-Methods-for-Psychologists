@@ -270,6 +270,76 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
 </div>
 </div>
+<section id="practice-1--using-logged-outcome-and-centred-predictor" class="level3">
+<h3 class="anchored" data-anchor-id="practice-1--using-logged-outcome-and-centred-predictor">Practice 1- using logged outcome and centred predictor</h3>
+</section>
+<section id="practice-2--adding-an-interaction-term" class="level3">
+<h3 class="anchored" data-anchor-id="practice-2--adding-an-interaction-term">Practice 2- Adding an interaction term</h3>
+<p>e.g.&nbsp;Does inequality predict hate crime more strongly in politically conservative states?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>lm3 <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  hate_crimes_per_100k_splc <span class="sc">~</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    gini_index <span class="sc">*</span>share_voters_voted_trump <span class="sc">+</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    median_household_income <span class="sc">+</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    share_unemployed_seasonal <span class="sc">+</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    share_non_white <span class="sc">+</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    share_population_with_high_school_degree,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> df</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = hate_crimes_per_100k_splc ~ gini_index * share_voters_voted_trump + 
+    median_household_income + share_unemployed_seasonal + share_non_white + 
+    share_population_with_high_school_degree, data = df)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.28513 -0.10266 -0.00897  0.07452  0.38489 
+
+Coefficients:
+                                           Estimate Std. Error t value Pr(&gt;|t|)
+(Intercept)                              -5.727e+00  2.046e+00  -2.800 0.007910
+gini_index                                1.114e+01  2.821e+00   3.950 0.000318
+share_voters_voted_trump                  8.402e+00  3.136e+00   2.679 0.010756
+median_household_income                  -5.764e-06  4.676e-06  -1.233 0.225039
+share_unemployed_seasonal                 3.633e+00  3.160e+00   1.150 0.257238
+share_non_white                          -4.487e-01  2.533e-01  -1.771 0.084300
+share_population_with_high_school_degree  2.053e+00  1.589e+00   1.292 0.204010
+gini_index:share_voters_voted_trump      -2.103e+01  6.670e+00  -3.153 0.003105
+                                            
+(Intercept)                              ** 
+gini_index                               ***
+share_voters_voted_trump                 *  
+median_household_income                     
+share_unemployed_seasonal                   
+share_non_white                          .  
+share_population_with_high_school_degree    
+gini_index:share_voters_voted_trump      ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.1559 on 39 degrees of freedom
+  (4 observations deleted due to missingness)
+Multiple R-squared:  0.6773,    Adjusted R-squared:  0.6193 
+F-statistic: 11.69 on 7 and 39 DF,  p-value: 6.626e-08</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">interact_plot</span>(lm3,</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">pred =</span> gini_index,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">modx =</span> share_voters_voted_trump,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">plot.points =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="GLM_1_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 </section>
 
 </main>
