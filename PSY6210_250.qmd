@@ -1,0 +1,225 @@
+---
+title: "PSY6210_250134881"
+date: "2026-03-09"
+format:docx
+---
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#call relevant packages
+library(car)
+library(here)
+library(psych)
+library(tidyverse)
+library(knitr)
+#load data 
+load(here("data", "Homework_2026a.Rdata"))
+df <- Homework2026
+```
+
+# Research Objectives
+
+The data used in this analysis was collected from researchers at the University of Sheffield who were interested in how people develop skills and knowledge throughout their lifetime.
+
+This analysis aims to examine factors associated with toddlers’ vocabulary size and to test whether socioeconomic status (SES) moderates the relationship between the home literacy environment and vocabulary outcomes.
+
+This analysis will test 3 hypotheses:
+
+1.  Toddlers with higher vocabulary sizes will also have parents with stronger knowledge,
+
+2.  Toddlers who spend more time reading will have higher vocabulary sizes,
+
+3.  The effect of reading time and materials that kids have will be moderated by\
+    socioeconomic status.
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#check data and confirm socioeconomic background is as a factor
+str(df)
+```
+
+# Data
+
+The data includes 350 observations of variables:
+
+-   *ToddlerVoc* (continuous): toddlers’ vocabulary size (in hundreds of words)
+
+-   *ParentVoc* (continuous): parental vocabulary size (in thousands of words)
+
+-   *ReadingTime* (continuous): average minutes per day spent reading
+
+-   *Books* (continuous): number of books available in the household
+
+-   *SES* (categorical): socioeconomic status (four quantiles)
+
+# Preliminary Analyses
+
+## Descriptive Statistics:
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false  
+#call psych package for descriptive stats
+desc <- round(describe(df), 2)
+kable(desc, caption = "Descriptive statistics")
+```
+
+## Correlation Matrix:
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+cor_mat <- round(cor(df[, c("ToddlerVoc","ParentVoc","ReadingTime","Books")]), 2)
+kable(cor_mat, caption = "Correlation Matrix")
+```
+
+Toddler vocabulary is positively correlated with all predictors. The strongest association is with parent vocabulary (r = .27), while reading time and number of books show weaker positive correlations (r = .18 each), showing support for hypotheses 1 and 2.
+
+## Check Distributions:
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#create histograms of continuous distributions
+par(mfrow = c(2, 2), oma = c(0, 0, 3, 0))
+hist(df$ToddlerVoc, main = "Toddler Vocabulary")
+hist(df$ParentVoc,  main = "Parent Vocabulary")
+hist(df$ReadingTime, main = "Reading Time")
+hist(df$Books,       main = "Books at Home")
+mtext("Distributions", outer = TRUE, cex = 1.2, font = 2)
+```
+
+All continuous variables follow a normal distribution.
+
+## Distribution of ToddlerVoc across SES quartiles:
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#create boxplot
+boxplot(ToddlerVoc ~ SES, data = df)
+```
+
+Toddler vocation looks to be sensitive to socioeconomic background.
+
+# Regression Analysis
+
+## Model 1
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#build linear model and summarise
+lm1 <- lm(ToddlerVoc ~ ParentVoc + ReadingTime + Books + SES, data = df)
+summary(lm1)
+```
+
+## Coefficient Interpretation
+
+**Parent Vocabulary:**
+
+Parent vocabulary was a significant positive predictor of toddler vocabulary (β = 0.247, p \< .001). This indicates that, holding other variables constant, a one thousand word increase in parent vocabulary is associated with an increase of approximately 25 words in toddler vocabulary size. This finding supports the hypothesis that toddlers with parents who have larger vocabularies tend to develop larger vocabularies themselves.
+
+**Reading Time:**
+
+Reading time was also a significant positive predictor (β = 0.229, p \< .001). This suggests that toddlers who spend more time reading each day tend to have larger vocabularies. Specifically, each additional minute of reading time is associated with a 23 word increase in toddler vocabulary, controlling for the other variables in the model.
+
+**Number of Books;**
+
+The number of books available in the household showed a positive and statistically significant relationship with toddler vocabulary (β = 0.302, p = .029). This indicates that children with access to more books tend to have slightly larger vocabularies, even when parental vocabulary, reading time, and SES are taken into account.
+
+**Socioeconomic Status (SES):**
+
+Socioeconomic status was included as a categorical variable with SES1 as the reference group.
+
+Compared to toddlers from SES1 households:
+
+-   Toddlers in SES2 households had vocabularies that were on average 836 words larger than that of SES1 households (p \< .001),
+
+-   Toddlers in SES3 households had vocabularies approximately 1921 words larger (p \< .001),
+
+-   Toddlers in SES4 households had vocabularies approximately 2774 units larger (p \< .001).
+
+These results indicate a strong positive association between socioeconomic status and toddler vocabulary size, with children from higher socioeconomic backgrounds showing substantially larger vocabularies.
+
+### Regression Equation
+
+ToddlerVoc = 18.69 + 0.25(ParentVoc) + 0.23(ReadingTime) + 0.301(Books)+8.36(SES2)+19.21(SES3) + 27.74(SES4)
+
+This model satisfies the hypothesises 1 and 2.
+
+### Model Fit
+
+The model explains 47.2% of the variance in toddler vocabulary (R² = .472; Adjusted R² = .463), indicating moderate explanatory power, and this was statistically significant, F(6, 343) = 51.11, p \< .001. The residual standard error of 11.17 (\~1,117 words) may reflect the natural variability in vocabulary development at this age.
+
+## Regression Assumptions
+
+#### Multicolinearity
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+vif <- vif(lm1)
+kable(vif, caption = "Multicollinearity")
+```
+
+Multicollinearity was assessed using Variance Inflation Factors. All adjusted VIF values were close to 1 (ParentVoc = 1.10, ReadingTime = 1.03, Books = 1.13, SES = 1.00), indicating no evidence of the predictors being too correlated.
+
+#### Residual Diagnostics
+
+```{r}
+par(mfrow = c(1,2))
+plot(lm1, 1)
+plot(lm1, 2)
+```
+
+**Linearity#:**
+
+The Residuals vs Fitted plot showed that residuals were randomly scattered around zero, suggesting that the assumption of linearity between the predictors and Toddler vocabulary is satisfied.
+
+**Homoscedasticity:**
+
+Additionally, the spread of residuals seems approximately constant, suggesting that the assumption of homoscedasticity was met.
+
+**Normality of Residuals:**
+
+The Normal Q-Q plot showed that residuals closely followed the reference line with only minor deviations at the tails, predominatey at the lower quartile. However, this indicates that the residuals were approximately normally distributed.
+
+## Model 2 (Moderation)
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+lm2 <- lm(ToddlerVoc ~ ParentVoc + ReadingTime * SES + Books * SES, data = df)
+summary(lm2)
+```
+
+To test whether socioeconomic status moderates the effects of reading time and the number of books, an interaction model was estimated. None of the interaction terms were statistically significant (p \> .05), indicating that the effects of reading time and books on toddler vocabulary do not differ across SES levels. The model fit was slightly higher than the baseline model (R² = 0.487, adjusted R² = 0.469), but the lack of significant interactions suggests that the simpler model without interactions is preferable.
+
+## Model Comparison
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+anova(lm1, lm2)
+```
+
+Model comparison using ANOVA indicated that adding interactions between reading time and SES, and books and SES, did not significantly improve model fit (F(6, 337) = 1.68, p = 0.124). The simpler model without interactions is therefore preferred, as it achieves nearly the same explanatory power (adjusted R² = 0.463) while remaining easier to interpret.
+
+# Conclusions
+
+This study examined whether parent vocabulary, reading time, number of books in the home, and socioeconomic status predict toddler vocabulary development. The results from Model 1 indicated that these factors collectively explained a substantial proportion of the variance in toddler vocabulary, accounting for approximately 47% of the variation in scores.
+
+Although parental vocabulary and aspects of the home literacy environment were positively associated with toddler vocabulary, the model including interaction terms between SES and reading time or books did not significantly improve model fit. This suggests that the relationships between these predictors and toddler vocabulary are broadly similar across SES groups. Overall, the findings highlight the importance of the home language environment in supporting early vocabulary development. Future research could explore additional factors that may account for the remaining unexplained variance in toddler vocabulary development.
